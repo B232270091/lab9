@@ -64,16 +64,7 @@ class ScholarshipCalculatorTest {
         assertEquals("F", calc.letterGrade(50));
     }
 
-    // gpa: both || conditions of the guard true
-    @Test
-    void gpa_null_throws() {
-        assertThrows(IllegalArgumentException.class, () -> calc.gpa(null));
-    }
-
-    @Test
-    void gpa_empty_throws() {
-        assertThrows(IllegalArgumentException.class, () -> calc.gpa(new double[0]));
-    }
+    // gpa: both || conditions of the guard are covered by the Part C loop-0 tests below
 
     // gpa: C, D and default (F) switch branches
     @Test
@@ -122,5 +113,30 @@ class ScholarshipCalculatorTest {
     @Test
     void scholarship_gpa2_5_credits16_is0() {
         assertEquals(0, calc.scholarship(2.5, 16, false));
+    }
+
+    // ---------- Part C: loop boundaries in gpa() (0 / 1 / 2+ iterations) ----------
+
+    // 0 iterations: the loop must never be reached; the guard rejects the input
+    @Test
+    void gpa_loop0_emptyArray_throws() {
+        assertThrows(IllegalArgumentException.class, () -> calc.gpa(new double[0]));
+    }
+
+    @Test
+    void gpa_loop0_null_throws() {
+        assertThrows(IllegalArgumentException.class, () -> calc.gpa(null));
+    }
+
+    // 1 iteration
+    @Test
+    void gpa_loop1_single95_is4_0() {
+        assertEquals(4.0, calc.gpa(new double[] {95}), 1e-9);
+    }
+
+    // 2+ iterations
+    @Test
+    void gpa_loop2plus_95_85_75_65_is2_5() {
+        assertEquals(2.5, calc.gpa(new double[] {95, 85, 75, 65}), 1e-9);
     }
 }
