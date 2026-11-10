@@ -99,3 +99,18 @@ loop-0 нэрээр шилжүүлж, 1 ба 2+ давталтын тест нэ
 оронд тогтмол тоонд хуваах зэрэг алдаа нэг эсвэл олон элементтэй үед л илэрнэ, харин хамралт 100% хэвээр
 байж болно. 0/1/2+ тестүүд давталтын хуримтлал ба зааг нөхцлийг шалгадаг бол хамралт зөвхөн мөр ба салаа
 биелсэн эсэхийг хэлдэг.
+
+## D. Хамралт 100% — гэхдээ алдаа амьд
+
+Спецификаци: 60–69.99 оноо "D". Зааг утгын 7 тест нэмсэн: `letterGrade_boundary60_isD`,
+`letterGrade_boundary59_99_isF`, `letterGrade_boundary69_99_isD`, `letterGrade_boundary0_isF`,
+`letterGrade_boundary100_isA`, `letterGrade_boundary89_99_isB`, `letterGrade_boundary90_isA`.
+
+`mvn test` (`results/mvn-test-D-fail.txt`): `Tests run: 30, Failures: 1` — унасан тест:
+
+```
+[ERROR]   ScholarshipCalculatorTest.letterGrade_boundary60_isD:147 expected: <D> but was: <F>
+```
+
+Кодыг спецификацитай мөр мөрөөр тулгахад `letterGrade`-ийн D мөр `if (score > 60) return "D";` байна —
+60 яг өөрөө D биш F болж байна. Бусад бүх зааг (`>= 90`, `>= 80`, `>= 70`) зөв `>=` ашиглаж байгаа.
