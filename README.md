@@ -44,3 +44,38 @@ OS name: "windows 11", version: "10.0", arch: "amd64", family: "windows"
 Шар ромботой мөрүүд нь нөхцлийн зөвхөн нэг талыг шалгасан газрууд: мөр 20, 31, 48-ийн `||`
 нөхцлүүдийн "үнэн" тал хэзээ ч биелээгүй, мөр 51-д `hasViolation == true` тест байхгүй, мөр 52–53-ийн
 `&&`-ийн "голч хангасан ч кредит дутуу" салаа, мөр 36-гийн `switch`-ийн C/D/default салаанууд дутуу.
+
+## B. CFG ба 100% branch хамралт
+
+![scholarship() CFG](cfg.png)
+
+`scholarship()`-ийн CFG (`cfg.png`, гараар зурсан). JaCoCo `||`/`&&` нөхцөл бүрийг тусдаа салаа
+гэж тоолдог тул зангилаа бүр нэг энгийн нөхцөл байна. Ирмэг бүр дээрх нэр нь тест файлын бодит метод:
+
+| Зангилаа | Ирмэг | Дайрах тест |
+|---|---|---|
+| D1 `gpa < 0` | T → throw | `scholarship_negativeGpa_throws` |
+| D1 | F → D2 | бусад бүх scholarship тест |
+| D2 `gpa > 4` | T → throw | `scholarship_gpaAbove4_throws` |
+| D2 | F → D3 | `scholarship_negativeCredits_throws` + throw-гүй бүх тест |
+| D3 `credits < 0` | T → throw | `scholarship_negativeCredits_throws` |
+| D3 | F → D4 | throw-гүй бүх тест |
+| D4 `hasViolation` | T → return 0 | `scholarship_violation_is0` |
+| D4 | F → D5 | үлдсэн 6 тест (доорх D5-ын хоёр мөрийн нийлбэр) |
+| D5 `gpa >= 3.8` | T → D6 | `scholarship_gpa3_9_credits16_noViolation_is100`, `scholarship_gpa3_9_credits14_is70` |
+| D5 | F → D7 | `scholarship_gpa3_5_credits12_noViolation_is70`, `scholarship_gpa3_5_credits10_is50`, `scholarship_gpa3_2_credits16_is50`, `scholarship_gpa2_5_credits16_is0` |
+| D6 `credits >= 15` | T → return 100 | `scholarship_gpa3_9_credits16_noViolation_is100` |
+| D6 | F → D7 | `scholarship_gpa3_9_credits14_is70` |
+| D7 `gpa >= 3.4` | T → D8 | `scholarship_gpa3_5_credits12_noViolation_is70`, `scholarship_gpa3_5_credits10_is50`, `scholarship_gpa3_9_credits14_is70` |
+| D7 | F → D9 | `scholarship_gpa3_2_credits16_is50`, `scholarship_gpa2_5_credits16_is0` |
+| D8 `credits >= 12` | T → return 70 | `scholarship_gpa3_5_credits12_noViolation_is70`, `scholarship_gpa3_9_credits14_is70` |
+| D8 | F → D9 | `scholarship_gpa3_5_credits10_is50` |
+| D9 `gpa >= 3.0` | T → return 50 | `scholarship_gpa3_5_credits10_is50`, `scholarship_gpa3_2_credits16_is50` |
+| D9 | F → return 0 | `scholarship_gpa2_5_credits16_is0` |
+
+Хэсэг A-гийн дараа хамрагдаагүй ирмэгүүд (D1–D3 T, D4 T, D6 F, D8 F, D9 T/F) шинэ тестийн жагсаалт болсон.
+`letterGrade`-д сөрөг/100-аас их оноо болон C/D/F, `gpa`-д null/хоосон массив ба C/D/default салаа нэмсэн.
+
+Нийт **21 тест** шаардлагатай болсон (`results/mvn-verify-B.txt`: `Tests run: 21, Failures: 0`).
+`results/jacoco-B.csv`: BRANCH_COVERED 41, **BRANCH_MISSED 0**; LINE_COVERED 25, **LINE_MISSED 0** —
+Branch 41/41 = 100%, Line 25/25 = 100%.
